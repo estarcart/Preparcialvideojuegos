@@ -6,27 +6,33 @@ public class New : MonoBehaviour
 {
     private Animator animator; // Referencia al componente Animator
     private Rigidbody2D rb;     // Referencia al componente Rigidbody2D
+    private Transform cameraTransform; // Referencia a la cámara principal
+
+    public float cameraFollowSpeed = 2.0f; // Velocidad a la que la cámara sigue al personaje
 
     void Start()
     {
         animator = GetComponent<Animator>(); // Obtén el Animator del GameObject
         rb = GetComponent<Rigidbody2D>();    // Obtén el Rigidbody2D del GameObject
+        cameraTransform = Camera.main.transform; // Obtén la transform de la cámara principal
     }
 
     void Update()
     {
-        float speed = 0.006f; // Ajusta la velocidad según sea necesario
-        float jumpForce = 5f; // Ajusta la fuerza de salto según sea necesario
+        float speed = 0.003f; // Ajusta la velocidad según sea necesario
+        float jumpForce = 3f; // Ajusta la fuerza de salto según sea necesario
         bool isMoving = false;
 
         if (Input.GetKey("d")) // Mover a la derecha
         {
             transform.position += new Vector3(speed, 0, 0);
+            transform.localScale = new Vector3(1, 1, 1); // Asegura que el personaje mire a la derecha
             isMoving = true;
         }
-        if (Input.GetKey("a")) // Mover a la izquierda
+        else if (Input.GetKey("a")) // Mover a la izquierda
         {
             transform.position += new Vector3(-speed, 0, 0);
+            transform.localScale = new Vector3(-1, 1, 1); // Asegura que el personaje mire a la izquierda
             isMoving = true;
         }
 
@@ -52,6 +58,9 @@ public class New : MonoBehaviour
         {
             animator.Play("fall");
         }
+
+        // Movimiento suave de la cámara
+        SmoothCameraFollow();
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -66,5 +75,14 @@ public class New : MonoBehaviour
         {
             animator.Play("idle");
         }
+    }
+
+    void SmoothCameraFollow()
+    {
+        // Posición objetivo de la cámara
+        Vector3 targetPosition = new Vector3(transform.position.x, transform.position.y, cameraTransform.position.z);
+        
+        // Interpolación lineal para movimiento suave
+        cameraTransform.position = Vector3.Lerp(cameraTransform.position, targetPosition, cameraFollowSpeed * Time.deltaTime);
     }
 }
